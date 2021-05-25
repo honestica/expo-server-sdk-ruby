@@ -330,7 +330,7 @@ module Exponent
     end
 
     def self.error_names
-      %w[DeviceNotRegistered MessageTooBig Apn
+      %w[DeviceNotRegistered MessageTooBig
          MessageRateExceeded InvalidCredentials
          Unknown]
     end
