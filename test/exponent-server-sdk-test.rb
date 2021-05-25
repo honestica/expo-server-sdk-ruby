@@ -52,6 +52,8 @@ class ExponentServerSdkTest < Minitest::Test
   def test_send_messages_with_empty_string_response_body
     @response_mock.expect(:code, 400)
     @response_mock.expect(:body, '')
+    @response_mock.expect(:code, 400)
+    @response_mock.expect(:body, '')
 
     @mock.expect(:post, @response_mock, client_args)
 
@@ -65,12 +67,15 @@ class ExponentServerSdkTest < Minitest::Test
       assert_equal(handler.response.code, 400)
     end
 
-    assert_match(/Unknown error format/, exception.message)
+    assert_equal("Unknown error format", exception.message)
+    assert_equal({:extra => { :status => 400, :body => ''}}, exception.sentry_context)
 
     @mock.verify
   end
 
   def test_send_messages_with_nil_response_body
+    @response_mock.expect(:code, 400)
+    @response_mock.expect(:body, nil)
     @response_mock.expect(:code, 400)
     @response_mock.expect(:body, nil)
 
@@ -86,12 +91,15 @@ class ExponentServerSdkTest < Minitest::Test
       assert_equal(handler.response.code, 400)
     end
 
-    assert_match(/Unknown error format/, exception.message)
+    assert_equal("Unknown error format", exception.message)
+    assert_equal({:extra => { :status => 400, :body => nil}}, exception.sentry_context)
 
     @mock.verify
   end
 
   def test_send_messages_with_gzip_empty_string_response
+    @response_mock.expect(:code, 400)
+    @response_mock.expect(:body, '')
     @response_mock.expect(:code, 400)
     @response_mock.expect(:body, '')
 
@@ -107,12 +115,15 @@ class ExponentServerSdkTest < Minitest::Test
       assert_equal(handler.response.code, 400)
     end
 
-    assert_match(/Unknown error format/, exception.message)
+    assert_equal("Unknown error format", exception.message)
+    assert_equal({:extra => { :status => 400, :body => ''}}, exception.sentry_context)
 
     @mock.verify
   end
 
   def test_send_messages_with_gzip_nil_response_body
+    @response_mock.expect(:code, 400)
+    @response_mock.expect(:body, nil)
     @response_mock.expect(:code, 400)
     @response_mock.expect(:body, nil)
 
@@ -128,12 +139,15 @@ class ExponentServerSdkTest < Minitest::Test
       assert_equal(handler.response.code, 400)
     end
 
-    assert_match(/Unknown error format/, exception.message)
+    assert_equal("Unknown error format", exception.message)
+    assert_equal({:extra => { :status => 400, :body => nil}}, exception.sentry_context)
 
     @mock.verify
   end
 
   def test_send_messages_with_unknown_error
+    @response_mock.expect(:code, 400)
+    @response_mock.expect(:body, error_body.to_json)
     @response_mock.expect(:code, 400)
     @response_mock.expect(:body, error_body.to_json)
 
@@ -143,12 +157,15 @@ class ExponentServerSdkTest < Minitest::Test
       @client.send_messages(messages)
     end
 
-    assert_match(/Unknown error format/, exception.message)
+    assert_equal("Unknown error format", exception.message)
+    assert_equal({:extra => { :status => 400, :body => "{\"errors\":[{\"code\":\"INTERNAL_SERVER_ERROR\",\"message\":\"An unknown error occurred.\"}]}"}}, exception.sentry_context)
 
     @mock.verify
   end
 
   def test_send_messages_with_gzip_unknown_error
+    @response_mock.expect(:code, 400)
+    @response_mock.expect(:body, error_body.to_json)
     @response_mock.expect(:code, 400)
     @response_mock.expect(:body, error_body.to_json)
 
@@ -158,7 +175,8 @@ class ExponentServerSdkTest < Minitest::Test
       @client_gzip.send_messages(messages)
     end
 
-    assert_match(/Unknown error format/, exception.message)
+    assert_equal("Unknown error format", exception.message)
+    assert_equal({:extra => { :status => 400, :body => "{\"errors\":[{\"code\":\"INTERNAL_SERVER_ERROR\",\"message\":\"An unknown error occurred.\"}]}"}}, exception.sentry_context)
 
     @mock.verify
   end
@@ -456,6 +474,8 @@ class ExponentServerSdkTest < Minitest::Test
   def test_publish_with_apn_error
     @response_mock.expect(:code, 200)
     @response_mock.expect(:body, apn_error_body.to_json)
+    @response_mock.expect(:code, 200)
+    @response_mock.expect(:body, apn_error_body.to_json)
 
     @mock.expect(:post, @response_mock, client_args)
 
@@ -463,7 +483,8 @@ class ExponentServerSdkTest < Minitest::Test
       @client.publish(messages)
     end
 
-    assert_match(/Unknown error format/, exception.message)
+    assert_equal("Unknown error format", exception.message)
+    assert_equal({:extra => { :status => nil, :body => {"data"=>[{"status"=>"error", "message"=>"Could not find APNs credentials for you (your_app). Check whether you are trying to send a notification to a detached app."}]}}}, exception.sentry_context)
 
     @mock.verify
   end

@@ -278,7 +278,7 @@ module Exponent
       end
 
       def unknown_error_format(response)
-        Exponent::Push::UnknownError.new("Unknown error format: #{response}")
+        Exponent::Push::UnknownError.new("Unknown error format", response)
       end
 
       ##### DEPRECATED METHODS #####
@@ -300,10 +300,37 @@ module Exponent
       end
     end
 
-    Error = Class.new(StandardError)
+    class Error < StandardError
+      attr_accessor :response
+
+      def initialize(message, response = nil)
+        super(message)
+        @response = response
+      end
+
+      def sentry_context
+        return {} unless response
+
+        {
+          :extra => { :status => status, :body => body}
+        }
+      end
+
+      def status
+        return response.code if response.respond_to? :code
+
+        nil
+      end
+
+      def body
+        return response.body if response.respond_to? :body
+
+        response
+      end
+    end
 
     def self.error_names
-      %w[DeviceNotRegistered MessageTooBig
+      %w[DeviceNotRegistered MessageTooBig Apn
          MessageRateExceeded InvalidCredentials
          Unknown]
     end
