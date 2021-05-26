@@ -316,6 +316,8 @@ module Exponent
         }
       end
 
+      alias_method :raven_context, :sentry_context
+
       def status
         return response.code if response.respond_to? :code
 
